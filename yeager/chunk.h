@@ -1,8 +1,20 @@
 #ifndef yeager_chunk_h
 #define yeager_chunk_h
 
-struct Chunk {
-    
-};
+#include "common.h"
+
+typedef enum {
+    OP_RETURN,
+} OP_CODE;
+
+typedef struct {
+    int count;
+    int capacity;
+    uint8_t *code;
+} Chunk;
+
+void initChunk(Chunk *chunk);
+void writeChunk(Chunk *chunk, uint8_t byte);
+void freeChunk(Chunk *chunk);
 
 #endif
