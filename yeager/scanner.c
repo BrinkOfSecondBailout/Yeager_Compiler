@@ -98,7 +98,7 @@ static bool isAlpha(char c) {
 
 static Token string() {
     while (peek() != '"' && !isAtEnd()) {
-        if (peen() == '\n') scanner.line++;
+        if (peek() == '\n') scanner.line++;
         advance();
     }
 
@@ -121,7 +121,7 @@ static Token number() {
 }
 
 static TokenType checkKeyword(int start, int length, const char *rest, TokenType type) {
-    if (scanner.current - scanner.start == start + length && memcpy(scanner.start + start, rest, length) == 0) {
+    if (scanner.current - scanner.start == start + length && memcmp(scanner.start + start, rest, length) == 0) {
         return type;
     }
 
@@ -169,7 +169,7 @@ static TokenType identifierType() {
 
 static Token identifier() {
     while(isAlpha(peek()) || isDigit(peek())) advance();
-    return makeToken(identiferType());
+    return makeToken(identifierType());
 }
 
 Token scanToken() {
