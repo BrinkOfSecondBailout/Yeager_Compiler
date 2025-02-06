@@ -11,6 +11,7 @@ typedef struct {
     Chunk *chunk;
     Value stack[STACK_MAX];
     Value *stackTop;
+    Obj *objects;
 } Vm;
 
 typedef enum {
@@ -18,6 +19,8 @@ typedef enum {
     INTERPRET_COMPILE_ERROR,
     INTERPRET_RUNTIME_ERROR
 } InterpretResult;
+
+extern Vm vm;
 
 void initVm();
 void freeVm();
