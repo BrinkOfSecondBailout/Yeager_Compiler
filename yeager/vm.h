@@ -12,6 +12,7 @@ typedef struct {
     Chunk *chunk;
     Value stack[STACK_MAX];
     Value *stackTop;
+    Table globals;
     Table strings;
     Obj *objects;
 } Vm;
