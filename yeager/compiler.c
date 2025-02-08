@@ -157,6 +157,8 @@ static void endCompiler() {
 static void expression();
 static void statement();
 static void declaration();
+static void and_(bool canAssign);
+static void or_(bool canAssign);
 static ParseRule *getRule(TokenType type);
 static void parsePrecedence(Precedence precedence);
 
@@ -457,6 +459,24 @@ static void defineVariable(uint8_t global) {
     emitBytes(OP_DEFINE_GLOBAL, global);
 }
 
+static void patchJump(int offset) {
+    int jump = currentChunk()->count - offset - 2;
+
+    if (jump > UINT16_MAX) {
+        error("Too much code to jump over.");
+    }
+
+    currentChunk()->code[offset] = (jump >> 8) & 0xff;
+    currentChunk()->code[offset + 1] = jump & 0xff;
+}
+
+static int emitJump(uint8_t instruction) {
+    emitByte(instruction);
+    emitByte(0xff);
+    emitByte(0xff);
+    return currentChunk()->count - 2;
+}
+
 static void and_(bool canAssign) {
     int endJump = emitJump(OP_JUMP_IF_FALSE);
 
@@ -507,13 +527,6 @@ static void expressionStatement() {
     emitByte(OP_POP);
 }
 
-static int emitJump(uint8_t instruction) {
-    emitByte(instruction);
-    emitByte(0xff);
-    emitByte(0xff);
-    return currentChunk()->count - 2;
-}
-
 static int emitLoop(int loopStart) {
     emitByte(OP_LOOP);
 
@@ -522,17 +535,6 @@ static int emitLoop(int loopStart) {
 
     emitByte((offset >> 8) & 0xff);
     emitByte((offset & 0xff));
-}
-
-static void patchJump(int offset) {
-    int jump = currentChunk()->count - offset - 2;
-
-    if (jump > UINT16_MAX) {
-        error("Too much code to jump over.");
-    }
-
-    currentChunk()->code[offset] = (jump >> 8) & 0xff;
-    currentChunk()->code[offset + 1] = jump & 0xff;
 }
 
 static void ifStatement() {
@@ -566,6 +568,20 @@ static void whileStatement() {
 
     patchJump(exitJump);
     emitByte(OP_POP);
+}
+
+static void beginScope() { 
+    current->scopeDepth++; 
+}
+
+static void endScope() {
+    current->scopeDepth--;
+
+    while (current->localCount > 0 &&
+            current->locals[current->localCount - 1].depth > current->scopeDepth) {
+        emitByte(OP_POP);
+        current->localCount--;
+    }
 }
 
 static void forStatement() {
@@ -607,20 +623,6 @@ static void forStatement() {
         emitByte(OP_POP);
     }
     endScope();
-}
-
-static void beginScope() { 
-    current->scopeDepth++; 
-}
-
-static void endScope() {
-    current->scopeDepth--;
-
-    while (current->localCount > 0 &&
-            current->locals[current->localCount - 1].depth > current->scopeDepth) {
-        emitByte(OP_POP);
-        current->localCount--;
-    }
 }
 
 static void statement() {
