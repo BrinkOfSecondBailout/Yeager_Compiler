@@ -544,13 +544,25 @@ static void ifStatement() {
 
     int thenJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
-    statement();
+
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before statement body.");
+    while(!check(TOKEN_RIGHT_BRACE)) {
+        statement();
+    }
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after statement body.");
 
     int elseJump = emitJump(OP_JUMP);
     patchJump(thenJump);
     emitByte(OP_POP);
 
-    if (match(TOKEN_ELSE)) statement();
+    if (match(TOKEN_ELSE)) {
+        consume(TOKEN_LEFT_BRACE, "Expect '{' before statement body.");
+        while (!check(TOKEN_RIGHT_BRACE)) {
+            statement();
+        }
+        consume(TOKEN_RIGHT_BRACE, "Expect '}' after statement body.");
+    }
+
     patchJump(elseJump);
 }
 
@@ -562,7 +574,14 @@ static void whileStatement() {
 
     int exitJump = emitJump(OP_JUMP_IF_FALSE);
     emitByte(OP_POP);
-    statement();
+
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before body statement(s).");
+    
+    while (!check(TOKEN_RIGHT_BRACE)) {
+        statement();
+    }
+
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after body statement(s).");
 
     emitLoop(loopStart);
 
@@ -615,7 +634,12 @@ static void forStatement() {
         patchJump(bodyJump);
     }
 
-    statement();
+    consume(TOKEN_LEFT_BRACE, "Expect '{' before statement body.");
+    while (!check(TOKEN_RIGHT_BRACE)) {
+        statement();
+    }
+    consume(TOKEN_RIGHT_BRACE, "Expect '}' after statement body.");
+
     emitLoop(loopStart);
 
     if (exitJump != -1) {

@@ -3,10 +3,30 @@
 // breakfast = "beignets with " + beverage;
 // print breakfast;
 
+//var i = 0;
+//while (i < 3) {
+//  print i;
+//   i = i + 1;
+//   print "a";
+//}
 
+//var i = 0;
+//for (; i < 3; i = i + 1) {
+//    print i;
+//    print "a";
+//    print "b";
+//}
 
+//var i = 3;
+//if (i < 3) {
+//    print i;
+//    i = i + 1;
+//    print i;
+//    print "a";
+//} else {
+//    print "b";
+//   print "c";
+//}
 
-var i = 0;
-while (i < 5)
-    print i;
-    i = i + 1;
+//var i = 5;
+//print(i == 7 or i < 2);
