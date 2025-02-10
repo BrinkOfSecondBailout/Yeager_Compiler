@@ -30,3 +30,9 @@
 
 //var i = 5;
 //print(i == 7 or i < 2);
+
+fun areWeHavingItYet() {
+  print "Yes we are!";
+}
+
+print areWeHavingItYet;
