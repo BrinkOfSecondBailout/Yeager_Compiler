@@ -1,3 +1,20 @@
+fun outer() {
+  var a = 1;
+  var b = 2;
+  fun middle() {
+    var c = 3;
+    var d = 4;
+    fun inner() {
+      print a + c + b + d;
+    }
+  }
+}
+
+
+
+
+
+
 // var breakfast = "beignets";
 // var beverage = "cafe au lait";
 // breakfast = "beignets with " + beverage;
@@ -38,13 +55,13 @@
 //print areWeHavingItYet;
 
 
-fun fib(n) {
-  if (n < 2) {
-    return n;
-  }
-  return fib(n - 2) + fib(n - 1);
-}
+//fun fib(n) {
+//  if (n < 2) {
+//    return n;
+//  }
+//  return fib(n - 2) + fib(n - 1);
+//}
 
-var start = clock();
-print fib(35);
-print clock() - start;
+//var start = clock();
+//print fib(35);
+//print clock() - start;
