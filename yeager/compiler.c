@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "common.h"
+#include "memory.h"
 #include "scanner.h"
 
 #ifdef DEBUG_PRINT_CODE
@@ -408,6 +409,7 @@ static int addUpvalue(Compiler *compiler, uint8_t index, bool isLocal) {
 
 static int resolveUpvalue(Compiler *compiler, Token *name) {
     if (compiler->enclosing == NULL) return -1;
+
     int local = resolveLocal(compiler->enclosing, name);
     if (local != -1) {
         compiler->enclosing->locals[local].isCaptured = true;
@@ -835,4 +837,12 @@ ObjFunction *compile(const char *source) {
 
     ObjFunction *function = endCompiler();
     return parser.hadError ? NULL : function;
+}
+
+void markCompilerRoots() {
+    Compiler *compiler = current;
+    while (compiler != NULL) {
+        markObject((Obj*)compiler->function);
+        compiler = compiler->enclosing;
+    }
 }
