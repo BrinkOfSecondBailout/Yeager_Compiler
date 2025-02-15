@@ -1,14 +1,14 @@
-fun outer() {
-  var x = "outside";
-  fun inner() {
-    print x;
-  }
-  inner();
-}
-outer();
+class Brioche {}
+print Brioche();
 
-
-
+//fun outer() {
+//  var x = "outside";
+//  fun inner() {
+//    print x;
+//  }
+//  inner();
+//}
+//outer();
 
 
 // var breakfast = "beignets";

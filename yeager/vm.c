@@ -62,6 +62,10 @@ Value pop() {
     return *vm.stackTop;
 }
 
+static Value peek(int distance) { 
+    return vm.stackTop[-1 - distance]; 
+}
+
 static bool isFalsey(Value value) {
     return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
 }
@@ -104,10 +108,6 @@ static void runtimeError(const char *format, ...) {
     resetStack();
 }
 
-static Value peek(int distance) {
-    return vm.stackTop[- 1 - distance];
-}
-
 static bool call(ObjClosure *closure, int argCount) {
     if (argCount != closure->function->arity) {
         runtimeError("Expected %d arguments but got %d.", closure->function->arity, argCount);
@@ -129,6 +129,11 @@ static bool call(ObjClosure *closure, int argCount) {
 static bool callValue(Value callee, int argCount) {
     if (IS_OBJ(callee)) {
         switch(OBJ_TYPE(callee)) {
+            case OBJ_CLASS: {
+                ObjClass *klass = AS_CLASS(callee);
+                vm.stackTop[-argCount - 1] = OBJ_VAL(newInstance(klass));
+                return true;
+            }
             case OBJ_CLOSURE:
                 return call(AS_CLOSURE(callee), argCount);
             case OBJ_NATIVE: {
@@ -360,6 +365,10 @@ static InterpretResult run() {
                 vm.stackTop = frame->slots;
                 push(result);
                 frame = &vm.frames[vm.frameCount - 1];
+                break;
+            }
+            case OP_CLASS: {
+                push(OBJ_VAL(newClass(READ_STRING())));
                 break;
             }
         }
