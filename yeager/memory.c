@@ -5,16 +5,22 @@
 #include "object.h"
 #include "vm.h"
 
+#define GC_HEAP_GROW_FACTOR 2
+
 #ifdef DEBUG_LOG_GC
     #include <stdio.h>
     #include "debug.h"
 #endif
 
 void * reallocate(void *pointer, size_t oldSize, size_t newSize) {
+    vm.bytesAllocated += newSize - oldSize;
     if (newSize > oldSize) {
         #ifdef DEBUG_STRESS_GC
             collectGarbage();
         #endif
+        if (vm.bytesAllocated > vm.nextGC) {
+            collectGarbage();
+        }
     }
 
     if (newSize == 0) {
@@ -32,6 +38,10 @@ void freeObject(Obj *object) {
     #endif
 
     switch(object->type) {
+        case OBJ_CLASS: {
+            FREE(ObjClass, object);
+            break;
+        }
         case OBJ_CLOSURE: {
             ObjClosure *closure = (ObjClosure*)object;
             FREE_ARRAY(ObjUpvalue*, closure->upvalues, closure->upvalueCount);
@@ -111,6 +121,11 @@ static void blackenObject(Obj* object) {
     #endif
 
     switch (object->type) {
+        case OBJ_CLASS: {
+            ObjClass *klass = (ObjClass*)object;
+            markObject((Obj*)klass->name);
+            break;
+        }
         case OBJ_CLOSURE: {
             ObjClosure *closure = (ObjClosure*)object;
             markObject((Obj*)closure->function);
@@ -183,6 +198,7 @@ static void sweep() {
 void collectGarbage() {
     #ifdef DEBUG_LOG_GC
         printf("-- gc begin\n");
+        size_t before = vm.bytesAllocated;
     #endif
 
     markRoots();
@@ -190,7 +206,10 @@ void collectGarbage() {
     tableRemoveWhite(&vm.strings);
     sweep();
 
+    vm.nextGC = vm.bytesAllocated * GC_HEAP_GROW_FACTOR;
+
     #ifdef DEBUG_LOG_GC
         printf("-- gc end\n");
+        printf("  collected %zu bytes (from %zu to %zu) next %zu\n", before - vm.bytesAllocated, before, vm.bytesAllocated, vm.nextGC);
     #endif
 }
