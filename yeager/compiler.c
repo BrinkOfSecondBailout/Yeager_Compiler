@@ -383,11 +383,11 @@ static void declareVariable() {
     for (int i = current->localCount - 1; i >= 0; i--) {
         Local *local = &current->locals[i];
         if (local->depth != -1 && local->depth < current->scopeDepth) {
-        break;
+            break;
         }
 
         if (identifiersEqual(name, &local->name)) {
-        error("Already a variable with this name in the scope.");
+            error("Already a variable with this name in the scope.");
         }
     }
 
@@ -642,6 +642,18 @@ static void classDeclaration() {
     ClassCompiler classCompiler;
     classCompiler.enclosing = currentClass;
     currentClass = &classCompiler;
+
+    if (match(TOKEN_LESS)) {
+        consume(TOKEN_IDENTIFIER, "Expect superclass name.");
+        variable(false);
+
+        if (identifiersEqual(&className, &parser.previous)) {
+            error("A class can't inherit from itself.");
+        }
+
+        namedVariable(className, false);
+        emitByte(OP_INHERIT);
+    }
 
     namedVariable(className, false);
     consume(TOKEN_LEFT_BRACE, "Expect '{' before class body.");
