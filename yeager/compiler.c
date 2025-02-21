@@ -410,9 +410,9 @@ static int resolveLocal(Compiler *compiler, Token *name) {
     for (int i = compiler->localCount - 1; i >= 0; i--) {
         Local *local = &compiler->locals[i];
         if (identifiersEqual(name, &local->name)) {
-        if (local->depth == -1) {
-            error("Can't read local variables in its own initializer.");
-        }
+            if (local->depth == -1) {
+                error("Can't read local variables in its own initializer.");
+            }
         return i;
         }
     }
@@ -738,23 +738,22 @@ static void returnStatement() {
 
 static void synchronize() {
     parser.panicMode = false;
-
     while (parser.current.type != TOKEN_EOF) {
         if (parser.previous.type == TOKEN_SEMICOLON) return;
         switch (parser.current.type) {
-        case TOKEN_CLASS:
-        case TOKEN_FUN:
-        case TOKEN_VAR:
-        case TOKEN_FOR:
-        case TOKEN_IF:
-        case TOKEN_WHILE:
-        case TOKEN_PRINT:
-        case TOKEN_RETURN:
-            return;
-
-        default:;  // Do nothing.
-        }
-        advance();
+            case TOKEN_CLASS:
+            case TOKEN_FUN:
+            case TOKEN_VAR:
+            case TOKEN_FOR:
+            case TOKEN_IF:
+            case TOKEN_WHILE:
+            case TOKEN_PRINT:
+            case TOKEN_RETURN:
+                return;
+            default:
+                ;  // Do nothing.
+            }
+            advance();
     }
 }
 
