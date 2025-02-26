@@ -168,6 +168,7 @@ static void initCompiler(Compiler *compiler, FunctionType type) {
     compiler->scopeDepth = 0;
     compiler->function = newFunction();
     current = compiler;
+
     if (type != TYPE_SCRIPT) {
         current->function->name = copyString(parser.previous.start, parser.previous.length);
     }
@@ -391,7 +392,6 @@ static void declareVariable() {
             error("Already a variable with this name in the scope.");
         }
     }
-
     addLocal(*name);
 }
 
@@ -413,7 +413,7 @@ static int resolveLocal(Compiler *compiler, Token *name) {
             if (local->depth == -1) {
                 error("Can't read local variables in its own initializer.");
             }
-        return i;
+            return i;
         }
     }
 
@@ -570,6 +570,8 @@ static ParseRule *getRule(TokenType type) {
 
 static void parsePrecedence(Precedence precedence) {
     advance();
+
+    // Parse the first component of the function (now in previous), usually a number, variable, or '(' etc
     ParseFn prefixRule = getRule(parser.previous.type)->prefix;
     if (prefixRule == NULL) {
         error("Expect expression.");
@@ -579,6 +581,7 @@ static void parsePrecedence(Precedence precedence) {
     bool canAssign = precedence <= PREC_ASSIGNMENT;
     prefixRule(canAssign);
 
+    // Stop and recurse if we hit a higher-precedence operator
     while (precedence <= getRule(parser.current.type)->precedence) {
         advance();
         ParseFn infixRule = getRule(parser.previous.type)->infix;
@@ -752,25 +755,36 @@ static void synchronize() {
                 return;
             default:
                 ;  // Do nothing.
-            }
-            advance();
+        }
+        advance();
     }
+}
+
+static int emitLoop(int loopStart) {
+    emitByte(OP_LOOP);
+
+    int offset = currentChunk()->count - loopStart + 2;
+    if (offset > UINT16_MAX) error("Loop body too large.");
+
+    emitByte((offset >> 8) & 0xff);
+    emitByte((offset & 0xff));
 }
 
 static void patchJump(int offset) {
     int jump = currentChunk()->count - offset - 2;
 
+    // Jump must fit within 16 bits
     if (jump > UINT16_MAX) {
         error("Too much code to jump over.");
     }
 
-    currentChunk()->code[offset] = (jump >> 8) & 0xff;
-    currentChunk()->code[offset + 1] = jump & 0xff;
+    currentChunk()->code[offset] = (jump >> 8) & 0xff; // High byte
+    currentChunk()->code[offset + 1] = jump & 0xff; // Low byte
 }
 
 static int emitJump(uint8_t instruction) {
     emitByte(instruction);
-    emitByte(0xff);
+    emitByte(0xff); // Return the offset of this byte here
     emitByte(0xff);
     return currentChunk()->count - 2;
 }
@@ -827,16 +841,6 @@ static void expressionStatement() {
     expression();
     consume(TOKEN_SEMICOLON, "Expect ';' after expression.");
     emitByte(OP_POP);
-}
-
-static int emitLoop(int loopStart) {
-    emitByte(OP_LOOP);
-
-    int offset = currentChunk()->count - loopStart + 2;
-    if (offset > UINT16_MAX) error("Loop body too large.");
-
-    emitByte((offset >> 8) & 0xff);
-    emitByte((offset & 0xff));
 }
 
 static void ifStatement() {
