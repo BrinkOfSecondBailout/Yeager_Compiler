@@ -791,11 +791,8 @@ static int emitJump(uint8_t instruction) {
 
 static void and_(bool canAssign) {
     int endJump = emitJump(OP_JUMP_IF_FALSE);
-
     emitByte(OP_POP);
-
     parsePrecedence(PREC_AND);
-
     patchJump(endJump);
 }
 

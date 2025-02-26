@@ -5,13 +5,20 @@ class Dog {
 }
 
 class Doberman < Dog {
+  init(name) {
+    this.name = name;
+  }
+  say() {
+    print this.name;
+  }
   bark() {
     super.bark();
     print "Doberman Woof!";
   }
 }
 
-var d = Doberman();
+var d = Doberman("Rex");
+d.say();
 d.bark();
 
 
