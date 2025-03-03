@@ -1,3 +1,76 @@
+class CoffeeMaker {
+  init(coffee) {
+    this.coffee = coffee;
+  }
+
+  brew() {
+    print "Enjoy your cup of " + this.coffee;
+
+    // No reusing the grounds!
+    this.coffee = nil;
+  }
+}
+
+var maker = CoffeeMaker("coffee and chicory");
+maker.brew();
+
+
+
+class Breakfast {
+    say() {
+      print this.name;
+    }
+}
+
+var eggs = Breakfast();
+eggs.name = "benedict";
+eggs.say();
+
+
+class Scone {
+  topping(first, second) {
+    print "scone with " + first + " and " + second;
+  }
+}
+var scone = Scone();
+scone.topping("berries", "cream");
+
+
+class Brunch {
+  eggs() {}
+}
+var brunch = Brunch();
+var eggs = brunch.eggs;
+
+
+
+
+class Brunch {
+  bacon() {}
+  eggs() {}
+}
+
+
+
+
+
+
+class Pair {}
+
+var myPair = Pair();
+myPair.first = 1;
+myPair.second = 2;
+print myPair.first + myPair.second;
+
+
+fun outer() {
+  var x = "outside";
+  fun inner() {
+    print x;
+  }
+  inner();
+}
+outer();
 
 
 

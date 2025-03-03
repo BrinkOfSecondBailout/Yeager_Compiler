@@ -1,11 +1,17 @@
-fun makeClosure(value) {
-  fun closure() {
-    print value;
+class Doughnut {
+  cook() {
+    print "Dunk in the fryer.";
+    this.finish("sprinkles");
   }
-  return closure;
+
+  finish(ingredient) {
+    print "Finish with " + ingredient;
+  }
 }
 
-var doughnut = makeClosure("doughnut");
-var bagel = makeClosure("bagel");
-doughnut();
-bagel();
+class Cruller < Doughnut {
+  finish(ingredient) {
+    // No sprinkles, always icing.
+    super.finish("icing");
+  }
+}
