@@ -1,93 +1,11 @@
-class Dog {
-  bark() {
-    print "woof";
+fun makeClosure(value) {
+  fun closure() {
+    print value;
   }
+  return closure;
 }
 
-class Doberman < Dog {
-  init(name) {
-    this.name = name;
-  }
-  say() {
-    print this.name;
-  }
-  bark() {
-    super.bark();
-    print "Doberman Woof!";
-  }
-}
-
-var d = Doberman("Rex");
-d.say();
-d.bark();
-
-
-
-
-
-
-
-
-
-
-
-//fun outer() {
-//  var x = "outside";
-//  fun inner() {
-//    print x;
-//  }
-//  inner();
-//}
-//outer();
-
-
-// var breakfast = "beignets";
-// var beverage = "cafe au lait";
-// breakfast = "beignets with " + beverage;
-// print breakfast;
-
-//var i = 0;
-//while (i < 3) {
-//  print i;
-//   i = i + 1;
-//   print "a";
-//}
-
-//var i = 0;
-//for (; i < 3; i = i + 1) {
-//    print i;
-//    print "a";
-//    print "b";
-//}
-
-//var i = 3;
-//if (i < 3) {
-//    print i;
-//    i = i + 1;
-//    print i;
-//    print "a";
-//} else {
-//    print "b";
-//   print "c";
-//}
-
-//var i = 5;
-//print(i == 7 or i < 2);
-
-//fun areWeHavingItYet() {
-//  print "Yes we are!";
-//}
-
-//print areWeHavingItYet;
-
-
-//fun fib(n) {
-//  if (n < 2) {
-//    return n;
-//  }
-//  return fib(n - 2) + fib(n - 1);
-//}
-
-//var start = clock();
-//print fib(35);
-//print clock() - start;
+var doughnut = makeClosure("doughnut");
+var bagel = makeClosure("bagel");
+doughnut();
+bagel();

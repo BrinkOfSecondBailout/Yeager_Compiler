@@ -377,7 +377,7 @@ static bool identifiersEqual(Token *a, Token *b) {
     return memcmp(a->start, b->start, a->length) == 0;
 }
 
-static void declareVariable() {
+static void declareLocalVariable() {
     if (current->scopeDepth == 0) return;
 
     Token *name = &parser.previous;
@@ -398,8 +398,8 @@ static void declareVariable() {
 static uint8_t parseVariable(const char *errorMessage) {
     consume(TOKEN_IDENTIFIER, errorMessage);
 
-    // For locals only
-    declareVariable();
+    // For locals only, globals don't need to be declared because they are late bound and the compiler doesn't care if it's been seen before
+    declareLocalVariable();
     if (current->scopeDepth > 0) return 0;
 
     // For globals only
@@ -416,7 +416,6 @@ static int resolveLocal(Compiler *compiler, Token *name) {
             return i;
         }
     }
-
     return -1;
 }
 
@@ -667,7 +666,7 @@ static void classDeclaration() {
     consume(TOKEN_IDENTIFIER, "Expect class name.");
     Token className = parser.previous;
     uint8_t nameConstant = identifierConstant(&parser.previous);
-    declareVariable();
+    declareLocalVariable();
 
     emitBytes(OP_CLASS, nameConstant);
     defineVariable(nameConstant);
